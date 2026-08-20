@@ -133,6 +133,17 @@ export function loadFixtureRecord({ build = "broken", viewport = "mobile-390" } 
   });
 }
 
+export function loadFixtureWorkspace({ build = "broken", viewport = "mobile-390" } = {}) {
+  const selected = loadFixtureRecord({ build, viewport });
+  const observed = build === "broken" ? selected : loadFixtureRecord({ build: "broken", viewport });
+  const retest = build === "fixed" ? selected : loadFixtureRecord({ build: "fixed", viewport });
+
+  return Object.freeze({
+    selected,
+    comparison: Object.freeze({ observed, retest })
+  });
+}
+
 export function filterIssues(issues = [], severity = "all") {
   if (severity === "all") return [...issues];
   return issues.filter((issue) => issue.severity === severity);

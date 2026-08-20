@@ -6,8 +6,8 @@ LaunchLens is a static HTML, CSS and JavaScript project with no runtime dependen
 
 The code is split on purpose:
 
-- `src/domain.mjs` owns the seeded record definitions, viewport rules, severity weighting and JSON report shape;
-- `src/app.mjs` owns the controls, filters, detail panel, recorded preview state and browser download;
+- `src/domain.mjs` owns the seeded record definitions, invariant observed/retest comparison, viewport rules, severity weighting and JSON report shape;
+- `src/app.mjs` owns the selected record, controls, filters, detail panel, comparison rendering and browser download;
 - `tests/domain.test.mjs` checks the deterministic record behavior without needing a browser;
 - `tests/browser/evidence.spec.mjs` checks the LaunchLens observed/retest presentation, project links and responsive containment in Chromium;
 - `scripts/verify-proof.mjs` checks that the written fixture records still match the current domain values.
@@ -15,6 +15,8 @@ The code is split on purpose:
 ## Fixture states
 
 `loadFixtureRecord()` accepts only two record states, `broken` and `fixed`, and three named simulated viewports. An unknown build or viewport throws instead of silently returning a plausible result.
+
+`loadFixtureWorkspace()` keeps two concepts separate: the selected record that drives the register, detail panel and release decision, and the stable observed/retest pair that drives the before/after preview. Both comparison panes use the same selected simulated viewport, but changing the selected build never turns the observed pane into a second retest pane.
 
 Each issue definition contains:
 
@@ -42,9 +44,9 @@ With two high, two medium and one low finding, the broken Mobile 390 fixture sco
 
 ## Test coverage
 
-The domain tests cover the seeded finding set, viewport-specific filtering, severity summary, fixed-record resolution, record completeness and phase selection, non-mutating filters, invalid input handling, report boundaries and JSON serialization.
+The domain tests cover the seeded finding set, viewport-specific filtering, severity summary, fixed-record resolution, stable comparison semantics, record completeness and phase selection, non-mutating filters, invalid input handling, report boundaries and JSON serialization.
 
-The browser regression exercises both LaunchLens UI states at desktop and Mobile 390 sizes. It checks that the rendered seeded pricing, validation and accessibility values agree with their labels and Recorded result fields, verifies the Source and CI destinations, and confirms that the compact LaunchLens page does not create horizontal scrolling. It does not run those seeded checks against a storefront.
+The browser regression exercises both LaunchLens UI states at desktop and Mobile 390 sizes. It checks that the named observed and retest preview regions are visible and unchanged after selecting the fixed build, that the retest detail has no stale 404 value, that the rendered seeded pricing, validation and accessibility values agree with their labels and Recorded result fields, that Source and CI have the expected destinations, and that the LaunchLens page does not create horizontal scrolling. It does not run those seeded checks against a storefront.
 
 The record verifier is deliberately separate from the unit tests. It reads the two Markdown files and compares their quoted values with `loadFixtureRecord()` output. This makes stale portfolio copy a failing check rather than a documentation surprise.
 

@@ -1,6 +1,6 @@
 import test from "node:test";
 import assert from "node:assert/strict";
-import { buildQaReport, filterIssues, loadFixtureRecord, serializeQaReport, summarizeIssues } from "../src/domain.mjs";
+import { buildQaReport, filterIssues, loadFixtureRecord, loadFixtureWorkspace, serializeQaReport, summarizeIssues } from "../src/domain.mjs";
 
 test("broken mobile fixture exposes the deterministic five-issue set", () => {
   const result = loadFixtureRecord({ build: "broken", viewport: "mobile-390" });
@@ -54,6 +54,22 @@ test("observed record retains exact seeded observed wording", () => {
   assert.equal(issues.get("broken-pricing-link").evidence, "Fixture record (observed): pricing target=/pricing-legacy; recorded outcome=404");
   assert.equal(issues.get("invalid-email-accepted").evidence, "Fixture record (observed): input=hello@; recorded outcome=accepted");
   assert.equal(issues.get("email-label-missing").evidence, "Fixture record (observed): recorded accessible name='(empty)'");
+});
+
+test("selected build never replaces the stable observed and retest comparison", () => {
+  const observedSelection = loadFixtureWorkspace({ build: "broken", viewport: "mobile-390" });
+  const fixedSelection = loadFixtureWorkspace({ build: "fixed", viewport: "mobile-390" });
+
+  assert.equal(observedSelection.selected, observedSelection.comparison.observed);
+  assert.equal(fixedSelection.selected, fixedSelection.comparison.retest);
+  assert.deepEqual(observedSelection.comparison, fixedSelection.comparison);
+  assert.equal(fixedSelection.comparison.observed.build, "broken");
+  assert.equal(fixedSelection.comparison.observed.summary.open, 5);
+  assert.match(fixedSelection.comparison.observed.issues[0].evidence, /pricing-legacy; recorded outcome=404/);
+  assert.equal(fixedSelection.comparison.retest.build, "fixed");
+  assert.equal(fixedSelection.comparison.retest.summary.resolved, 5);
+  assert.match(fixedSelection.comparison.retest.issues[0].evidence, /pricing; recorded outcome=200/);
+  assert.doesNotMatch(fixedSelection.comparison.retest.issues[0].evidence, /404/);
 });
 
 test("every finding contains complete seeded record fields", () => {

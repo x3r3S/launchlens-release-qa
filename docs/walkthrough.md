@@ -26,6 +26,8 @@ Return the severity filter to **All findings**, switch the viewport to **Desktop
 
 Switch back to **Mobile 390**, then choose **Open fixed-build record**. The same five seeded findings should now show **Resolved**, with no open findings and a model score of 100/100.
 
+The register, selected detail and release decision move to the passing retest record. The comparison itself remains a before/after record: observed 1.4.2 on the left and retest 1.4.3 on the right. Both panes remain available in the compact layout.
+
 ## 5. Take the record with you
 
 Choose **Export record**. The downloaded JSON contains the selected record state, simulated viewport, summary and full seeded fields for each finding. Export happens in the browser; the demo sends nothing to a server.

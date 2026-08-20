@@ -1,5 +1,11 @@
 # Changelog
 
+## Unreleased
+
+- Kept the observed 1.4.2 and retest 1.4.3 preview panes stable while the selected record changes.
+- Restored the full before/after comparison on compact layouts instead of hiding the retest pane.
+- Added domain and Chromium wide/mobile regressions for preview names, content, visibility and post-retest invariance.
+
 ## 1.3.0 — 2026-08-20
 
 - Corrected a retest-model bug that paired resolved statuses with stale failing evidence.
