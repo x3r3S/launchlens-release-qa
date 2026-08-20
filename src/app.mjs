@@ -1,9 +1,9 @@
-import { VIEWPORTS, buildQaReport, filterIssues, scanFixture, serializeQaReport } from "./domain.mjs";
+import { VIEWPORTS, buildQaReport, filterIssues, loadFixtureRecord, serializeQaReport } from "./domain.mjs";
 
 const elements = {
   build: document.querySelector("#build-select"),
   viewport: document.querySelector("#viewport-select"),
-  scan: document.querySelector("#run-scan"),
+  load: document.querySelector("#load-record"),
   retest: document.querySelector("#retest-fixed"),
   export: document.querySelector("#export-report"),
   filter: document.querySelector("#severity-filter"),
@@ -21,7 +21,7 @@ const elements = {
 };
 
 let state = {
-  scan: scanFixture({ build: "broken", viewport: "mobile-390" }),
+  record: loadFixtureRecord({ build: "broken", viewport: "mobile-390" }),
   selectedId: "broken-pricing-link",
   filter: "all"
 };
@@ -32,14 +32,14 @@ for (const viewport of Object.values(VIEWPORTS)) {
   option.textContent = `${viewport.label} · simulated`;
   elements.viewport.append(option);
 }
-elements.viewport.value = state.scan.viewport.id;
+elements.viewport.value = state.record.viewport.id;
 
 function labelSeverity(value) {
   return value.charAt(0).toUpperCase() + value.slice(1);
 }
 
 function displayText(value) {
-  return String(value ?? "").replace(/\bfixture\b/gi, "test build");
+  return String(value ?? "");
 }
 
 function showToast(message) {
@@ -50,12 +50,12 @@ function showToast(message) {
 }
 
 function renderMetrics() {
-  const { summary } = state.scan;
+  const { summary } = state.record;
   const cards = [
-    ["Release score", `${summary.score}/100`, summary.score === 100 ? "Ready for handoff" : "Needs review"],
+    ["Fixture score", `${summary.score}/100`, summary.score === 100 ? "Recorded pass state" : "Seeded findings open"],
     ["Open findings", String(summary.open), `${summary.high} high · ${summary.medium} medium`],
-    ["Viewport", `${state.scan.viewport.width} px`, "Simulated width"],
-    ["Evidence fields", "4", "Repro · expected · actual · trace"]
+    ["Viewport", `${state.record.viewport.width} px`, "Simulated width"],
+    ["Recorded fields", "4", "Repro · expected · result · record"]
   ];
   elements.metrics.replaceChildren(...cards.map(([label, value, meta]) => {
     const card = document.createElement("article");
@@ -79,9 +79,12 @@ function renderMetrics() {
 }
 
 function renderIssues() {
-  const visible = filterIssues(state.scan.issues, state.filter);
+  const visible = filterIssues(state.record.issues, state.filter);
   if (!visible.some((issue) => issue.id === state.selectedId)) state.selectedId = visible[0]?.id ?? "";
-  elements.issueCount.textContent = `${visible.length} shown`;
+  const resolved = visible.filter((issue) => issue.status === "resolved").length;
+  elements.issueCount.textContent = resolved
+    ? `${visible.length} shown · ${resolved} resolved`
+    : `${visible.length} shown`;
   elements.issueList.replaceChildren(...visible.map((issue) => {
     const button = document.createElement("button");
     button.type = "button";
@@ -90,7 +93,7 @@ function renderIssues() {
     button.setAttribute("aria-pressed", String(issue.id === state.selectedId));
     const number = document.createElement("span");
     number.className = "issue-number";
-    number.textContent = `LL-${String(state.scan.issues.findIndex((item) => item.id === issue.id) + 1).padStart(3, "0")}`;
+    number.textContent = `LL-${String(state.record.issues.findIndex((item) => item.id === issue.id) + 1).padStart(3, "0")}`;
     const copy = document.createElement("span");
     copy.className = "issue-copy";
     const title = document.createElement("strong");
@@ -129,18 +132,22 @@ function detailBlock(label, value) {
 }
 
 function renderDetail() {
-  const issue = state.scan.issues.find((item) => item.id === state.selectedId);
+  const issue = state.record.issues.find((item) => item.id === state.selectedId);
   elements.detail.replaceChildren();
   if (!issue) {
     elements.detail.className = "detail empty-state";
-    elements.detail.textContent = "Select a finding to inspect its evidence.";
+    elements.detail.textContent = "Select a finding to inspect its recorded state.";
     return;
   }
   elements.detail.className = "detail";
+  elements.detail.dataset.status = issue.status;
   const top = document.createElement("div");
   top.className = "detail-top";
   const kicker = document.createElement("span");
-  kicker.textContent = `${issue.severity} severity / ${issue.status}`;
+  kicker.className = "detail-status";
+  kicker.textContent = issue.status === "resolved"
+    ? `Retest record / ${issue.severity} finding`
+    : `Observed record / ${issue.severity} severity`;
   const title = document.createElement("h3");
   title.textContent = issue.title;
   top.append(kicker, title);
@@ -154,70 +161,77 @@ function renderDetail() {
   const stepBlock = document.createElement("div");
   stepBlock.className = "detail-block";
   const stepTitle = document.createElement("h4");
-  stepTitle.textContent = "Reproduction";
+  stepTitle.textContent = "Recorded reproduction";
   stepBlock.append(stepTitle, steps);
   const evidence = document.createElement("code");
   evidence.textContent = displayText(issue.evidence);
+  evidence.setAttribute("aria-label", issue.status === "resolved" ? "Recorded retest result" : "Observed fixture record");
   const evidenceBlock = document.createElement("div");
   evidenceBlock.className = "detail-block evidence";
+  evidenceBlock.dataset.phase = issue.evidencePhase;
   const evidenceTitle = document.createElement("h4");
-  evidenceTitle.textContent = "Evidence";
+  evidenceTitle.textContent = issue.status === "resolved" ? "Recorded retest result" : "Observed fixture record";
   evidenceBlock.append(evidenceTitle, evidence);
-  elements.detail.append(top, stepBlock, detailBlock("Expected", issue.expected), detailBlock("Actual", issue.actual), evidenceBlock);
+  elements.detail.append(top, stepBlock, detailBlock("Expected", issue.expected), detailBlock("Recorded result", issue.actual), evidenceBlock);
 }
 
 function renderPreview() {
-  const fixed = state.scan.build === "fixed";
-  elements.preview.dataset.build = state.scan.build;
-  elements.preview.style.setProperty("--fixture-width", `${Math.min(state.scan.viewport.width, 520)}px`);
-  elements.preview.querySelector("[data-preview-build]").textContent = fixed ? "Retest build 1.4.3" : "Observed build 1.4.2";
-  elements.preview.querySelector("[data-preview-state]").textContent = fixed ? "all findings resolved" : "5 findings open";
+  const fixed = state.record.build === "fixed";
+  elements.preview.dataset.build = state.record.build;
+  elements.preview.style.setProperty("--fixture-width", `${Math.min(state.record.viewport.width, 520)}px`);
+  elements.preview.querySelector("[data-preview-build]").textContent = fixed ? "Retest fixture record 1.4.3" : "Observed fixture record 1.4.2";
+  elements.preview.querySelector("[data-preview-state]").textContent = fixed
+    ? `${state.record.summary.resolved} findings resolved`
+    : `${state.record.summary.open} findings open`;
   elements.preview.querySelector("[data-preview-link]").textContent = fixed ? "/pricing · 200" : "/pricing-legacy · 404";
   elements.preview.querySelector("[data-preview-form]").textContent = fixed ? "Validates input + labelled field" : "Accepts hello@ + missing label";
 }
 
 function render() {
-  elements.build.value = state.scan.build;
-  elements.viewport.value = state.scan.viewport.id;
+  const fixed = state.record.build === "fixed";
+  elements.build.value = state.record.build;
+  elements.viewport.value = state.record.viewport.id;
   elements.filter.value = state.filter;
-  elements.status.textContent = state.scan.build === "fixed" ? "PASS · READY" : "HOLD · 5 OPEN";
-  elements.status.dataset.pass = String(state.scan.build === "fixed");
-  elements.decisionNote.textContent = state.scan.build === "fixed" ? "Retest evidence supports release handoff" : "Evidence review required before handoff";
+  elements.status.textContent = fixed ? "FIXTURE · PASS" : `FIXTURE HOLD · ${state.record.summary.open} OPEN`;
+  elements.status.dataset.pass = String(fixed);
+  elements.decisionNote.textContent = fixed ? "Recorded comparison reaches the fixture pass state" : "Seeded findings remain open in this fixture record";
+  elements.retest.disabled = fixed;
+  elements.retest.textContent = fixed ? "Retest record loaded · build 1.4.3" : "Open fixed-build record →";
   renderMetrics();
   renderIssues();
   renderDetail();
   renderPreview();
 }
 
-function runScan(build = elements.build.value) {
-  state.scan = scanFixture({ build, viewport: elements.viewport.value });
-  state.selectedId = state.scan.issues[0]?.id ?? "";
+function loadRecord(build = elements.build.value) {
+  state.record = loadFixtureRecord({ build, viewport: elements.viewport.value });
+  state.selectedId = state.record.issues[0]?.id ?? "";
   render();
-  showToast(build === "fixed" ? "Fixed build retested locally." : "Observed build checked locally.");
+  showToast(build === "fixed" ? "Fixed-build record loaded locally." : "Observed-build record loaded locally.");
 }
 
-elements.scan.addEventListener("click", () => runScan());
+elements.load.addEventListener("click", () => loadRecord());
 elements.retest.addEventListener("click", () => {
   elements.build.value = "fixed";
-  runScan("fixed");
+  loadRecord("fixed");
 });
-elements.build.addEventListener("change", () => runScan());
-elements.viewport.addEventListener("change", () => runScan());
+elements.build.addEventListener("change", () => loadRecord());
+elements.viewport.addEventListener("change", () => loadRecord());
 elements.filter.addEventListener("change", () => {
   state.filter = elements.filter.value;
   renderIssues();
   renderDetail();
 });
 elements.export.addEventListener("click", () => {
-  const report = buildQaReport(state.scan);
+  const report = buildQaReport(state.record);
   const blob = new Blob([serializeQaReport(report)], { type: "application/json" });
   const url = URL.createObjectURL(blob);
   const anchor = document.createElement("a");
   anchor.href = url;
-  anchor.download = `launchlens-${state.scan.build}-${state.scan.viewport.id}.json`;
+  anchor.download = `launchlens-${state.record.build}-${state.record.viewport.id}.json`;
   anchor.click();
   URL.revokeObjectURL(url);
-  showToast("Local JSON report prepared. No data was sent.");
+  showToast("Local fixture record prepared. No data was sent.");
 });
 
 render();

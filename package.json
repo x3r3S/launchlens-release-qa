@@ -1,18 +1,24 @@
 {
   "name": "launchlens-release-qa",
   "private": true,
-  "version": "1.2.0",
-  "description": "A reproducible release-QA evidence workspace with a fixed-build retest.",
+  "version": "1.3.0",
+  "description": "A deterministic presentation of seeded release-QA records and a before-and-after comparison.",
   "license": "SEE LICENSE IN PORTFOLIO-REVIEW-LICENSE.md",
   "type": "module",
+  "packageManager": "pnpm@11.19.0",
   "engines": {
     "node": ">=20"
   },
   "scripts": {
     "demo": "node scripts/serve.mjs",
     "test": "node --test tests/*.test.mjs",
-    "check": "node --check src/domain.mjs && node --check src/app.mjs && node --check scripts/serve.mjs && node --check scripts/verify-proof.mjs",
+    "test:browser": "playwright test",
+    "check": "node --check src/domain.mjs && node --check src/app.mjs && node --check scripts/serve.mjs && node --check scripts/verify-proof.mjs && node --check scripts/verify-manifest.mjs && node --check playwright.config.mjs && node --check tests/browser/evidence.spec.mjs",
     "verify:evidence": "node scripts/verify-proof.mjs",
-    "verify": "npm run check && npm test && npm run verify:evidence"
+    "verify:manifest": "node scripts/verify-manifest.mjs",
+    "verify": "pnpm run check && pnpm test && pnpm run verify:evidence && pnpm run test:browser && pnpm run verify:manifest"
+  },
+  "devDependencies": {
+    "@playwright/test": "^1.62.1"
   }
 }

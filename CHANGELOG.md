@@ -1,5 +1,15 @@
 # Changelog
 
+## 1.3.0 — 2026-08-20
+
+- Corrected a retest-model bug that paired resolved statuses with stale failing evidence.
+- Added distinct observed and passing traces for pricing, validation, accessibility, responsive layout and duplicate-id checks.
+- Added Chromium regressions for rendered evidence semantics and compact-layout overflow.
+- Made observed failure and passing retest evidence easier to distinguish in the detail panel.
+- Documented the root cause and the guardrails that prevent the contradiction from returning.
+- Relabelled every seeded outcome as a fixture record so the demo cannot be mistaken for executed storefront, HTTP, DOM, accessibility or geometry testing.
+- Added accessible Source and CI links to the desktop and compact headers.
+
 ## 1.2.0 — 2026-08-20
 
 - Added a complete sample bug report for the broken pricing route.

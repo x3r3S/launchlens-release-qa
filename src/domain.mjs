@@ -20,9 +20,10 @@ const BLUEPRINTS = Object.freeze([
     viewports: Object.freeze(Object.keys(VIEWPORTS)),
     repro: Object.freeze(["Open the fixture storefront header.", "Activate Pricing in the main navigation."]),
     expected: "The Pricing link opens an available page.",
-    actual: "The fixture returns a 404 response for /pricing-legacy.",
-    resolvedActual: "The link now targets /pricing and returns the fixture success page.",
-    evidence: "Fixture route check: GET /pricing-legacy → 404"
+    actual: "The seeded 1.4.2 record marks /pricing-legacy as a 404 outcome.",
+    resolvedActual: "The seeded 1.4.3 retest record marks /pricing as a 200 outcome.",
+    observedEvidence: "Fixture record (observed): pricing target=/pricing-legacy; recorded outcome=404",
+    resolvedEvidence: "Fixture record (retest): pricing target=/pricing; recorded outcome=200"
   }),
   Object.freeze({
     id: "invalid-email-accepted",
@@ -33,9 +34,10 @@ const BLUEPRINTS = Object.freeze([
     viewports: Object.freeze(Object.keys(VIEWPORTS)),
     repro: Object.freeze(["Enter hello@ in the email field.", "Activate Join the list."]),
     expected: "Submission is blocked with a useful inline error.",
-    actual: "The broken fixture shows a success message.",
-    resolvedActual: "Invalid input is rejected and the field receives an inline error.",
-    evidence: "Fixture assertion: invalid payload returned success=true"
+    actual: "The seeded 1.4.2 record marks hello@ as accepted.",
+    resolvedActual: "The seeded 1.4.3 retest record marks hello@ as rejected with an inline error.",
+    observedEvidence: "Fixture record (observed): input=hello@; recorded outcome=accepted",
+    resolvedEvidence: "Fixture record (retest): input=hello@; recorded outcome=rejected; inline error=present"
   }),
   Object.freeze({
     id: "email-label-missing",
@@ -46,9 +48,10 @@ const BLUEPRINTS = Object.freeze([
     viewports: Object.freeze(Object.keys(VIEWPORTS)),
     repro: Object.freeze(["Inspect the newsletter input accessibility name.", "Navigate to the field using the keyboard."]),
     expected: "The input exposes the visible Email label to assistive technology.",
-    actual: "The accessible name is empty in the broken fixture.",
-    resolvedActual: "A visible label is associated with the input by id.",
-    evidence: "Fixture accessibility tree: textbox name='(empty)'"
+    actual: "The seeded 1.4.2 record has no accessible name for the newsletter field.",
+    resolvedActual: "The seeded 1.4.3 retest record gives the newsletter field the name Email.",
+    observedEvidence: "Fixture record (observed): recorded accessible name='(empty)'",
+    resolvedEvidence: "Fixture record (retest): recorded accessible name='Email'"
   }),
   Object.freeze({
     id: "promo-row-overflow",
@@ -59,9 +62,10 @@ const BLUEPRINTS = Object.freeze([
     viewports: Object.freeze(["mobile-390", "mobile-412"]),
     repro: Object.freeze(["Select a simulated narrow viewport.", "Inspect the promotion row at the top of the fixture."]),
     expected: "Content wraps without horizontal scrolling.",
-    actual: "The fixture row is 46 px wider than its simulated viewport.",
-    resolvedActual: "The row wraps and its measured width stays within the viewport.",
-    evidence: "Fixture geometry: scrollWidth 436 px > clientWidth 390 px"
+    actual: "The seeded Mobile 390 record is 46 px wider than its simulated viewport.",
+    resolvedActual: "The seeded Mobile 390 retest record fits the simulated viewport and marks wrapping enabled.",
+    observedEvidence: "Simulated fixture record (observed): row=436 px; viewport=390 px; overflow=46 px",
+    resolvedEvidence: "Simulated fixture record (retest): row=390 px; viewport=390 px; overflow=0; wrap=enabled"
   }),
   Object.freeze({
     id: "duplicate-newsletter-id",
@@ -72,9 +76,10 @@ const BLUEPRINTS = Object.freeze([
     viewports: Object.freeze(Object.keys(VIEWPORTS)),
     repro: Object.freeze(["Parse the fixture DOM.", "Count elements with id newsletter-email."]),
     expected: "Every id value is unique within the page.",
-    actual: "Two fixture elements use id='newsletter-email'.",
-    resolvedActual: "Each control now has a unique id.",
-    evidence: "Fixture DOM rule: duplicate-id count=2"
+    actual: "The seeded 1.4.2 record contains two newsletter-email ids.",
+    resolvedActual: "The seeded 1.4.3 retest record contains no duplicate newsletter control id.",
+    observedEvidence: "Fixture record (observed): recorded duplicate newsletter-email id count=2",
+    resolvedEvidence: "Fixture record (retest): recorded duplicate newsletter-email id count=0"
   })
 ]);
 
@@ -97,7 +102,7 @@ export function summarizeIssues(issues = []) {
   return Object.freeze(summary);
 }
 
-export function scanFixture({ build = "broken", viewport = "mobile-390" } = {}) {
+export function loadFixtureRecord({ build = "broken", viewport = "mobile-390" } = {}) {
   if (!Object.hasOwn(VIEWPORTS, viewport)) throw new RangeError("Unknown simulated viewport");
   if (!new Set(["broken", "fixed"]).has(build)) throw new RangeError("Unknown fixture build");
 
@@ -113,7 +118,8 @@ export function scanFixture({ build = "broken", viewport = "mobile-390" } = {}) 
     repro: [...issue.repro],
     expected: issue.expected,
     actual: build === "fixed" ? issue.resolvedActual : issue.actual,
-    evidence: build === "fixed" ? `Retest passed — ${issue.evidence}` : issue.evidence
+    evidencePhase: build === "fixed" ? "retest" : "observed",
+    evidence: build === "fixed" ? issue.resolvedEvidence : issue.observedEvidence
   }));
 
   return Object.freeze({
@@ -123,7 +129,7 @@ export function scanFixture({ build = "broken", viewport = "mobile-390" } = {}) 
     issues: Object.freeze(issues),
     summary: summarizeIssues(issues),
     externalWrites: false,
-    disclaimer: "Viewport checks are deterministic simulations, not tests on real Safari, iOS, Android, or physical devices."
+    disclaimer: "All findings are seeded fixture records. Viewport values are deterministic simulations, not measurements from a storefront, browser matrix, or physical device."
   });
 }
 
@@ -132,17 +138,18 @@ export function filterIssues(issues = [], severity = "all") {
   return issues.filter((issue) => issue.severity === severity);
 }
 
-export function buildQaReport(scan, { projectName = "Northstar Store", generatedAt = new Date().toISOString() } = {}) {
-  if (!scan?.viewport?.simulated || !Array.isArray(scan?.issues)) throw new TypeError("A LaunchLens scan is required");
+export function buildQaReport(record, { projectName = "Northstar Store", generatedAt = new Date().toISOString() } = {}) {
+  if (!record?.viewport?.simulated || !Array.isArray(record?.issues)) throw new TypeError("A LaunchLens fixture record is required");
   return Object.freeze({
     schemaVersion: 1,
+    recordType: "seeded-simulation",
     project: cleanText(projectName, 80) || "Untitled fixture",
     generatedAt: cleanText(generatedAt, 40),
-    source: "LaunchLens QA evidence fixture",
-    build: scan.build,
-    viewport: { id: scan.viewport.id, width: scan.viewport.width, height: scan.viewport.height, simulated: true },
-    summary: { ...scan.summary },
-    issues: scan.issues.map((issue) => ({
+    source: "LaunchLens seeded QA fixture record",
+    build: record.build,
+    viewport: { id: record.viewport.id, width: record.viewport.width, height: record.viewport.height, simulated: true },
+    summary: { ...record.summary },
+    issues: record.issues.map((issue) => ({
       id: issue.id,
       title: issue.title,
       severity: issue.severity,
@@ -152,9 +159,10 @@ export function buildQaReport(scan, { projectName = "Northstar Store", generated
       repro: [...issue.repro],
       expected: issue.expected,
       actual: issue.actual,
+      evidencePhase: issue.evidencePhase,
       evidence: issue.evidence
     })),
-    disclaimer: scan.disclaimer,
+    disclaimer: record.disclaimer,
     externalWrites: false
   });
 }

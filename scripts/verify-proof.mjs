@@ -2,7 +2,7 @@ import assert from "node:assert/strict";
 import { readFile } from "node:fs/promises";
 import { fileURLToPath } from "node:url";
 import { dirname, join } from "node:path";
-import { scanFixture } from "../src/domain.mjs";
+import { loadFixtureRecord } from "../src/domain.mjs";
 
 const projectRoot = join(dirname(fileURLToPath(import.meta.url)), "..");
 const [bugReport, retestReport] = await Promise.all([
@@ -13,8 +13,8 @@ const plainMarkdown = (value) => value.replaceAll("`", "").replaceAll("*", "");
 const bugReportText = plainMarkdown(bugReport);
 const retestReportText = plainMarkdown(retestReport);
 
-const broken = scanFixture({ build: "broken", viewport: "mobile-390" });
-const fixed = scanFixture({ build: "fixed", viewport: "mobile-390" });
+const broken = loadFixtureRecord({ build: "broken", viewport: "mobile-390" });
+const fixed = loadFixtureRecord({ build: "fixed", viewport: "mobile-390" });
 const pricingBefore = broken.issues.find((issue) => issue.id === "broken-pricing-link");
 const pricingAfter = fixed.issues.find((issue) => issue.id === "broken-pricing-link");
 
@@ -28,7 +28,8 @@ for (const value of [
   pricingBefore.expected,
   pricingBefore.actual,
   pricingBefore.evidence,
-  pricingAfter.actual
+  pricingAfter.actual,
+  pricingAfter.evidence
 ]) {
   assert.ok(bugReportText.includes(value), `bug report is missing current domain value: ${value}`);
 }
@@ -53,6 +54,10 @@ for (const claim of summaryClaims) {
 
 for (const issue of fixed.issues) {
   assert.ok(retestReportText.includes(issue.actual), `retest report is missing corrected result: ${issue.actual}`);
+  assert.ok(retestReportText.includes(issue.evidence), `retest report is missing passing evidence: ${issue.evidence}`);
+  assert.equal(issue.evidencePhase, "retest", `fixed finding has the wrong evidence phase: ${issue.id}`);
+  assert.match(issue.evidence, /fixture record \(retest\)/i, `fixed finding is not labelled as a fixture record: ${issue.id}`);
+  assert.doesNotMatch(issue.evidence, /recorded outcome=404|outcome=accepted|name='\(empty\)'|overflow=46|count=2/, `fixed finding repeats stale failure evidence: ${issue.id}`);
 }
 
-console.log("Proof pack matches the current Mobile 390 fixture and fixed-build retest.");
+console.log("Proof pack matches both seeded observed and retest fixture records for Mobile 390.");

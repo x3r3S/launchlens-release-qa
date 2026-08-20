@@ -4,7 +4,7 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width,initial-scale=1">
   <meta name="color-scheme" content="light">
-  <title>LaunchLens — Release evidence room</title>
+  <title>LaunchLens — Seeded release record</title>
   <link rel="icon" href="favicon.svg" type="image/svg+xml">
   <link rel="stylesheet" href="styles.css">
 </head>
@@ -18,7 +18,13 @@
       <span>Northstar Store</span>
       <b>Release review · 1.4.2 → 1.4.3</b>
     </div>
-    <button id="export-report" class="export-button" type="button">Export evidence</button>
+    <div class="product-actions">
+      <nav class="project-links" aria-label="Project links">
+        <a href="https://github.com/x3r3S/launchlens-release-qa" target="_blank" rel="noopener noreferrer">Source</a>
+        <a href="https://github.com/x3r3S/launchlens-release-qa/actions" target="_blank" rel="noopener noreferrer">CI</a>
+      </nav>
+      <button id="export-report" class="export-button" type="button">Export record</button>
+    </div>
   </header>
 
   <main id="workspace" class="release-room">
@@ -26,34 +32,34 @@
       <div class="report-heading">
         <p class="folio">RELEASE DOSSIER / 18 AUG 2026</p>
         <h1 id="page-title">Pre-launch quality review</h1>
-        <p class="standfirst">A decision record for five storefront findings, with reproducible evidence and a like-for-like fixed-build retest.</p>
+        <p class="standfirst">A synthetic decision exercise with five seeded storefront findings and a recorded before-and-after state comparison.</p>
       </div>
       <dl class="report-meta">
         <div><dt>Owner</dt><dd>Web QA</dd></div>
         <div><dt>Scope</dt><dd>Checkout entry</dd></div>
         <div><dt>Target</dt><dd>Build 1.4.3</dd></div>
       </dl>
-      <div class="decision-block" aria-label="Current release decision">
-        <span>Release decision</span>
-        <strong id="scan-status"></strong>
-        <small id="decision-note">Evidence review required before handoff</small>
+      <div class="decision-block" aria-label="Current fixture decision">
+        <span>Fixture decision</span>
+        <strong id="scan-status" aria-live="polite"></strong>
+        <small id="decision-note">Seeded findings remain open in this fixture record</small>
       </div>
     </section>
 
-    <section class="control-strip" aria-label="Evidence controls">
+    <section class="control-strip" aria-label="Fixture record controls">
       <label>
-        Review build
+        Recorded build
         <select id="build-select">
-          <option value="broken">Observed · 1.4.2</option>
-          <option value="fixed">Retest · 1.4.3</option>
+          <option value="broken">Observed record · 1.4.2</option>
+          <option value="fixed">Retest record · 1.4.3</option>
         </select>
       </label>
       <label>
         Test viewport
         <select id="viewport-select"></select>
       </label>
-      <button id="run-scan" class="primary-action" type="button">Run evidence check</button>
-      <p class="boundary-note"><span aria-hidden="true">†</span> Viewport checks are deterministic browser-size simulations, not physical-device coverage.</p>
+      <button id="load-record" class="primary-action" type="button">Load recorded state</button>
+      <p class="boundary-note"><span aria-hidden="true">†</span> Seeded fixture records only. No storefront, route, DOM, accessibility tree or device was tested.</p>
     </section>
 
     <section id="metrics" class="report-summary" aria-label="Review summary"></section>
@@ -84,22 +90,22 @@
         <header class="sheet-heading evidence-heading">
           <div>
             <p class="section-number">SECTION 02</p>
-            <h2 id="evidence-title">Evidence & retest</h2>
+            <h2 id="evidence-title">Recorded state & retest</h2>
           </div>
           <span>LIKE-FOR-LIKE COMPARISON</span>
         </header>
 
         <div id="fixture-preview" class="fixture-preview" data-build="broken">
-          <section class="capture-pane observed-pane" aria-label="Observed build preview">
-            <div class="capture-label"><b data-preview-build>Observed build 1.4.2</b><span data-preview-state>5 findings open</span></div>
+          <section class="capture-pane observed-pane" aria-label="Observed fixture record preview">
+            <div class="capture-label"><b data-preview-build>Observed fixture record 1.4.2</b><span data-preview-state>5 findings open</span></div>
             <div class="preview-window">
               <div class="preview-nav"><b>northstar</b><span>Journal</span><span>Objects</span><span class="fault" data-preview-link>/pricing-legacy · 404</span></div>
               <div class="preview-art"><span>OBJECT 07</span><strong>Quiet tools<br>for loud ideas.</strong><i></i></div>
               <div class="preview-form"><span>EARLY ACCESS</span><b data-preview-form>Accepts hello@ + missing label</b></div>
             </div>
           </section>
-          <section class="capture-pane fixed-pane" aria-label="Fixed build reference">
-            <div class="capture-label"><b>Retest build 1.4.3</b><span>reference state</span></div>
+          <section class="capture-pane fixed-pane" aria-label="Retest fixture record preview">
+            <div class="capture-label"><b>Retest fixture record 1.4.3</b><span>recorded state</span></div>
             <div class="preview-window">
               <div class="preview-nav"><b>northstar</b><span>Journal</span><span>Objects</span><span class="pass">/pricing · 200</span></div>
               <div class="preview-art"><span>OBJECT 07</span><strong>Quiet tools<br>for loud ideas.</strong><i></i></div>
@@ -108,12 +114,12 @@
           </section>
         </div>
 
-        <div id="issue-detail" class="detail"></div>
-        <button id="retest-fixed" class="retest-action" type="button">Open fixed-build retest <span aria-hidden="true">→</span></button>
+        <div id="issue-detail" class="detail" aria-live="polite"></div>
+        <button id="retest-fixed" class="retest-action" type="button">Open fixed-build record <span aria-hidden="true">→</span></button>
       </article>
     </section>
 
-    <footer class="report-footer"><span>LaunchLens / Release evidence room</span><span>Local evidence · no external write</span></footer>
+    <footer class="report-footer"><span>LaunchLens / Seeded release exercise</span><span>Recorded fixture · no external checks or writes</span></footer>
   </main>
 
   <div id="toast" class="toast" role="status" aria-live="polite" hidden></div>
