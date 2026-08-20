@@ -6,29 +6,30 @@ LaunchLens is a static HTML, CSS and JavaScript project with no runtime dependen
 
 The code is split on purpose:
 
-- `src/domain.mjs` owns the fixture definitions, viewport rules, severity weighting and JSON report shape;
-- `src/app.mjs` owns the controls, filters, detail panel, preview state and browser download;
-- `tests/domain.test.mjs` checks the deterministic behavior without needing a browser;
-- `scripts/verify-proof.mjs` checks that the written QA evidence still matches the current domain values.
+- `src/domain.mjs` owns the seeded record definitions, viewport rules, severity weighting and JSON report shape;
+- `src/app.mjs` owns the controls, filters, detail panel, recorded preview state and browser download;
+- `tests/domain.test.mjs` checks the deterministic record behavior without needing a browser;
+- `tests/browser/evidence.spec.mjs` checks the LaunchLens observed/retest presentation, project links and responsive containment in Chromium;
+- `scripts/verify-proof.mjs` checks that the written fixture records still match the current domain values.
 
 ## Fixture states
 
-`scanFixture()` accepts only two builds, `broken` and `fixed`, and three named simulated viewports. An unknown build or viewport throws instead of silently returning a plausible result.
+`loadFixtureRecord()` accepts only two record states, `broken` and `fixed`, and three named simulated viewports. An unknown build or viewport throws instead of silently returning a plausible result.
 
 Each issue definition contains:
 
 - a stable id and selector;
 - category and severity;
 - the viewports where it applies;
-- reproduction steps;
-- expected, broken and corrected results;
-- a compact fixture evidence string.
+- intended reproduction steps for the invented case;
+- expected behaviour plus seeded observed and corrected results;
+- separate, explicitly labelled observed and retest fixture-record strings.
 
-The mobile overflow finding is intentionally absent from the 1440 px desktop scan. The other four checks apply to all configured viewports.
+The seeded mobile overflow finding is intentionally absent from the 1440 px desktop record. The other four records apply to all configured viewports.
 
-## Score calculation
+## Fixture score calculation
 
-The release score is a compact summary for this fixture, not an industry standard. It begins at 100 and deducts points only for open findings:
+The fixture score is a compact model summary, not a measured quality score or industry standard. It begins at 100 and deducts points only for seeded open findings:
 
 | Severity | Deduction |
 | --- | ---: |
@@ -41,10 +42,12 @@ With two high, two medium and one low finding, the broken Mobile 390 fixture sco
 
 ## Test coverage
 
-The domain tests cover the issue set, viewport-specific filtering, severity summary, fixed-build resolution, evidence completeness, non-mutating filters, invalid input handling, report boundaries and JSON serialization.
+The domain tests cover the seeded finding set, viewport-specific filtering, severity summary, fixed-record resolution, record completeness and phase selection, non-mutating filters, invalid input handling, report boundaries and JSON serialization.
 
-The evidence verifier is deliberately separate from the unit tests. It reads the two Markdown reports and compares their quoted values with live `scanFixture()` results. This makes stale portfolio evidence a failing check rather than a documentation surprise.
+The browser regression exercises both LaunchLens UI states at desktop and Mobile 390 sizes. It checks that the rendered seeded pricing, validation and accessibility values agree with their labels and Recorded result fields, verifies the Source and CI destinations, and confirms that the compact LaunchLens page does not create horizontal scrolling. It does not run those seeded checks against a storefront.
+
+The record verifier is deliberately separate from the unit tests. It reads the two Markdown files and compares their quoted values with `loadFixtureRecord()` output. This makes stale portfolio copy a failing check rather than a documentation surprise.
 
 ## Boundaries
 
-The UI preview is a controlled fixture, not an embedded storefront. Route responses, layout geometry, accessibility output and form behavior are deterministic records used to exercise the QA workflow. There is no network scanner, browser automation, device lab, authentication, analytics or external write path in this project.
+The UI preview is an illustration backed by hard-coded records, not an embedded storefront. Route outcomes, layout values, accessibility names and form outcomes are seeded data used to demonstrate a reporting workflow. Playwright automates the LaunchLens interface only. There is no storefront scanner, route request, form submission, DOM fixture, accessibility-tree capture, device lab, authentication, analytics or external write path in this project.

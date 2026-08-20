@@ -13,9 +13,11 @@
 
 ## Problem
 
-The Pricing item in the fixture header points to a route that has been removed. Someone following it from the main navigation reaches the fixture's 404 response instead of the pricing page.
+This seeded case models a Pricing item that points to a removed route. The 1.4.2 fixture record marks that target as a 404 outcome; LaunchLens does not make an HTTP request to verify it.
 
-## Reproduction
+## Recorded reproduction steps
+
+These steps belong to the invented case and were not executed by this app.
 
 1. Open the fixture storefront header.
 2. Activate **Pricing** in the main navigation.
@@ -26,14 +28,16 @@ The Pricing link opens an available page.
 
 ## Actual in 1.4.2
 
-The fixture returns a 404 response for `/pricing-legacy`.
+The seeded 1.4.2 record marks `/pricing-legacy` as a 404 outcome.
 
-## Evidence
+## Observed fixture record
 
-`Fixture route check: GET /pricing-legacy → 404`
+`Fixture record (observed): pricing target=/pricing-legacy; recorded outcome=404`
 
 ## Retest in 1.4.3
 
-**Passed.** The link now targets `/pricing` and returns the fixture success page.
+**Recorded as resolved.** The seeded 1.4.3 retest record marks `/pricing` as a 200 outcome.
 
-The route response is part of the deterministic fixture. This report does not describe a request to a public or client website.
+**Retest record:** `Fixture record (retest): pricing target=/pricing; recorded outcome=200`
+
+Both outcomes are deterministic fixture data. This report does not claim that a public or client route was requested.

@@ -1,12 +1,12 @@
 # Retest notes — fixture build 1.4.3
 
-**Scope:** the same five checks were run against builds 1.4.2 and 1.4.3 at the simulated Mobile 390 viewport (390 × 844).
+**Scope:** the same five seeded findings are compared between the 1.4.2 and 1.4.3 fixture records at a simulated Mobile 390 viewport (390 × 844). No storefront, route, form, DOM, accessibility tree or layout engine was tested to create these values.
 
 ## Summary
 
 | Result | Broken 1.4.2 | Fixed 1.4.3 |
 | --- | ---: | ---: |
-| Release score | 51/100 | 100/100 |
+| Fixture score | 51/100 | 100/100 |
 | Open findings | 5 | 0 |
 | Resolved findings | 0 | 5 |
 | High | 2 | 0 |
@@ -15,27 +15,27 @@
 
 The score starts at 100 and deducts 15 points for each open high finding, 8 for each medium finding and 3 for each low finding. A resolved finding does not deduct points.
 
-## Result by check
+## Recorded finding comparison
 
-| ID | Check | Severity | Result in 1.4.2 | Retest result in 1.4.3 |
-| --- | --- | --- | --- | --- |
-| LL-001 | Pricing link reaches a removed route | High | `/pricing-legacy` returns the fixture 404 response | The link now targets `/pricing` and returns the fixture success page. |
-| LL-002 | Signup accepts an invalid email address | High | `hello@` is accepted | Invalid input is rejected and the field receives an inline error. |
-| LL-003 | Newsletter field has no programmatic label | Medium | Accessible name is empty | A visible label is associated with the input by id. |
-| LL-004 | Promotion row overflows narrow viewports | Medium | Measured width is 436 px at a 390 px simulated viewport | The row wraps and its measured width stays within the viewport. |
-| LL-005 | Newsletter controls reuse the same id | Low | Duplicate-id count is 2 | Each control now has a unique id. |
+| ID | Seeded finding | Severity | Recorded state in 1.4.2 | Recorded retest state in 1.4.3 | Retest fixture record |
+| --- | --- | --- | --- | --- | --- |
+| LL-001 | Pricing link reaches a removed route | High | The seeded 1.4.2 record marks /pricing-legacy as a 404 outcome. | The seeded 1.4.3 retest record marks /pricing as a 200 outcome. | `Fixture record (retest): pricing target=/pricing; recorded outcome=200` |
+| LL-002 | Signup accepts an invalid email address | High | The seeded 1.4.2 record marks hello@ as accepted. | The seeded 1.4.3 retest record marks hello@ as rejected with an inline error. | `Fixture record (retest): input=hello@; recorded outcome=rejected; inline error=present` |
+| LL-003 | Newsletter field has no programmatic label | Medium | The seeded 1.4.2 record has no accessible name for the newsletter field. | The seeded 1.4.3 retest record gives the newsletter field the name Email. | `Fixture record (retest): recorded accessible name='Email'` |
+| LL-004 | Promotion row overflows narrow viewports | Medium | The seeded Mobile 390 record is 46 px wider than its simulated viewport. | The seeded Mobile 390 retest record fits the simulated viewport and marks wrapping enabled. | `Simulated fixture record (retest): row=390 px; viewport=390 px; overflow=0; wrap=enabled` |
+| LL-005 | Newsletter controls reuse the same id | Low | The seeded 1.4.2 record contains two newsletter-email ids. | The seeded 1.4.3 retest record contains no duplicate newsletter control id. | `Fixture record (retest): recorded duplicate newsletter-email id count=0` |
 
 ## Exit decision for this fixture
 
-All five seeded checks return a resolved state in build 1.4.3, so this contained fixture passes its defined retest. That result is limited to the deterministic checks above. Cross-browser work, physical devices, exploratory testing, performance, security and integration behavior remain outside this exercise.
+All five seeded findings are marked resolved in the 1.4.3 record, so the contained comparison reaches its fixture pass state. This is a model-consistency result, not product test evidence. Cross-browser work, physical devices, HTTP behavior, DOM behavior, accessibility, exploratory testing, performance, security and integrations remain outside this exercise.
 
-## Reproduce the result
+## Verify model consistency
 
 From the repository root:
 
 ```powershell
-npm test
-npm run verify:evidence
+pnpm test
+pnpm run verify:evidence
 ```
 
-The first command exercises the broken and fixed domain states. The second checks that the values quoted here still agree with the implementation.
+The first command checks the two deterministic record states. The second checks that the values quoted here still agree with the implementation.

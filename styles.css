@@ -47,6 +47,10 @@ button:focus-visible, select:focus-visible, a:focus-visible { outline: 3px solid
 .release-id { display: flex; align-items: center; gap: 11px; min-width: 0; color: #aeb2b2; font-size: 12px; }
 .release-id span { color: #f5f2e9; }
 .release-id b { overflow: hidden; font-weight: 500; text-overflow: ellipsis; white-space: nowrap; }
+.product-actions { display: flex; align-items: center; gap: 9px; }
+.project-links { display: flex; align-items: center; gap: 5px; }
+.project-links a { min-height: 34px; display: inline-grid; place-items: center; padding: 6px 9px; color: #d9dddc; border: 1px solid #555b5c; text-decoration: none; font-size: 10px; font-weight: 750; }
+.project-links a:hover { color: #fff; border-color: #9fa4a4; }
 .export-button { min-height: 34px; padding: 6px 12px; color: #f5f2e9; border: 1px solid #6f7475; background: transparent; cursor: pointer; font-size: 11px; font-weight: 750; }
 .export-button:hover { border-color: #f5f2e9; }
 
@@ -130,15 +134,18 @@ select { width: 100%; min-height: 38px; padding: 7px 30px 7px 10px; color: var(-
 .detail { min-height: 304px; margin: 0 22px; padding: 20px 0 12px; border-bottom: 1px solid var(--line); }
 .detail-top { display: grid; grid-template-columns: 110px minmax(0,1fr); align-items: start; gap: 14px; }
 .detail-top span { padding-top: 4px; color: var(--red); font-size: 8px; font-weight: 900; letter-spacing: .08em; text-transform: uppercase; }
+.detail[data-status="resolved"] .detail-status { color: var(--green); }
 .detail-top h3 { margin: 0 0 12px; font: 600 22px/1.15 Georgia, serif; }
 .detail-block { display: grid; grid-template-columns: 110px minmax(0,1fr); gap: 14px; margin-top: 11px; }
 .detail-block h4 { margin: 0; color: var(--muted); font-size: 8px; letter-spacing: .09em; text-transform: uppercase; }
 .detail-block p { margin: 0; font-size: 11px; }
 .repro-list { margin: 0; padding-left: 17px; font-size: 11px; }
 .evidence code { display: block; overflow-wrap: anywhere; padding: 7px 9px; border-left: 2px solid var(--red); background: var(--paper-deep); font: 9px/1.45 Consolas, monospace; }
+.evidence[data-phase="retest"] code { border-left-color: var(--green); background: #e5ede7; }
 .empty-state { padding: 28px 12px; color: var(--muted); text-align: center; font-size: 11px; }
 .retest-action { margin: 14px 22px 0; background: var(--red); border-color: var(--red); }
 .retest-action:hover { background: #962f27; }
+.retest-action:disabled { color: #dfe8e2; border-color: var(--green); background: var(--green); cursor: default; opacity: 1; }
 .report-footer { min-height: 40px; display: flex; align-items: center; justify-content: space-between; gap: 20px; padding: 0 22px; color: var(--muted); border-top: 1px solid var(--line-dark); font-size: 8px; letter-spacing: .08em; text-transform: uppercase; }
 .toast { position: fixed; right: 20px; bottom: 20px; z-index: 10; max-width: min(360px,calc(100% - 40px)); padding: 11px 14px; color: #fff; border-left: 4px solid var(--red); background: var(--ink); box-shadow: 0 12px 30px rgba(0,0,0,.2); font-size: 11px; }
 .toast[hidden] { display: none; }
@@ -155,6 +162,9 @@ select { width: 100%; min-height: 38px; padding: 7px 30px 7px 10px; color: var(-
 @media (max-width: 700px) {
   .product-bar { grid-template-columns: 1fr auto; gap: 12px; min-height: 54px; padding: 0 14px; }
   .release-id { display: none; }
+  .product-actions { gap: 6px; }
+  .project-links { gap: 4px; }
+  .project-links a { padding-inline: 7px; font-size: 9px; }
   .release-room { width: calc(100% - 16px); margin: 8px auto 18px; }
   .report-masthead { grid-template-columns: 1fr; gap: 18px; padding: 22px 18px 18px; }
   .report-meta { display: none; }
@@ -177,6 +187,11 @@ select { width: 100%; min-height: 38px; padding: 7px 30px 7px 10px; color: var(-
   .detail-top, .detail-block { grid-template-columns: 1fr; gap: 4px; }
   .detail-top h3 { font-size: 20px; }
   .retest-action { width: calc(100% - 28px); margin: 14px 14px 0; }
+}
+
+@media (max-width: 350px) {
+  .product-bar { grid-template-columns: 1fr; padding-block: 8px; }
+  .product-actions { width: 100%; justify-content: space-between; }
 }
 
 @media (max-width: 420px) {
