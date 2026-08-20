@@ -1,4 +1,4 @@
-import { VIEWPORTS, buildQaReport, filterIssues, loadFixtureRecord, serializeQaReport } from "./domain.mjs";
+import { VIEWPORTS, buildQaReport, filterIssues, loadFixtureWorkspace, serializeQaReport } from "./domain.mjs";
 
 const elements = {
   build: document.querySelector("#build-select"),
@@ -20,8 +20,11 @@ const elements = {
   toast: document.querySelector("#toast")
 };
 
+const initialWorkspace = loadFixtureWorkspace({ build: "broken", viewport: "mobile-390" });
+
 let state = {
-  record: loadFixtureRecord({ build: "broken", viewport: "mobile-390" }),
+  record: initialWorkspace.selected,
+  comparison: initialWorkspace.comparison,
   selectedId: "broken-pricing-link",
   filter: "all"
 };
@@ -176,15 +179,10 @@ function renderDetail() {
 }
 
 function renderPreview() {
-  const fixed = state.record.build === "fixed";
-  elements.preview.dataset.build = state.record.build;
+  elements.preview.dataset.selectedBuild = state.record.build;
   elements.preview.style.setProperty("--fixture-width", `${Math.min(state.record.viewport.width, 520)}px`);
-  elements.preview.querySelector("[data-preview-build]").textContent = fixed ? "Retest fixture record 1.4.3" : "Observed fixture record 1.4.2";
-  elements.preview.querySelector("[data-preview-state]").textContent = fixed
-    ? `${state.record.summary.resolved} findings resolved`
-    : `${state.record.summary.open} findings open`;
-  elements.preview.querySelector("[data-preview-link]").textContent = fixed ? "/pricing · 200" : "/pricing-legacy · 404";
-  elements.preview.querySelector("[data-preview-form]").textContent = fixed ? "Validates input + labelled field" : "Accepts hello@ + missing label";
+  elements.preview.querySelector("[data-observed-state]").textContent = `${state.comparison.observed.summary.open} findings open`;
+  elements.preview.querySelector("[data-retest-state]").textContent = `${state.comparison.retest.summary.resolved} findings resolved`;
 }
 
 function render() {
@@ -204,7 +202,9 @@ function render() {
 }
 
 function loadRecord(build = elements.build.value) {
-  state.record = loadFixtureRecord({ build, viewport: elements.viewport.value });
+  const workspace = loadFixtureWorkspace({ build, viewport: elements.viewport.value });
+  state.record = workspace.selected;
+  state.comparison = workspace.comparison;
   state.selectedId = state.record.issues[0]?.id ?? "";
   render();
   showToast(build === "fixed" ? "Fixed-build record loaded locally." : "Observed-build record loaded locally.");

@@ -116,7 +116,7 @@ select { width: 100%; min-height: 38px; padding: 7px 30px 7px 10px; color: var(-
 .capture-label { display: flex; justify-content: space-between; gap: 8px; margin-bottom: 8px; color: var(--muted); font-size: 8px; text-transform: uppercase; letter-spacing: .04em; }
 .capture-label b { color: var(--ink); }
 .capture-label span { color: var(--red); font-weight: 800; }
-.fixed-pane .capture-label span, .fixture-preview[data-build="fixed"] .observed-pane .capture-label span { color: var(--green); }
+.fixed-pane .capture-label span { color: var(--green); }
 .preview-window { width: min(100%, var(--fixture-width,520px)); min-height: 164px; margin: 0 auto; overflow: hidden; background: #f8f4ea; box-shadow: 0 6px 15px rgba(20,25,26,.13); }
 .preview-nav { min-height: 28px; display: flex; align-items: center; gap: 9px; padding: 0 10px; color: #66635d; border-bottom: 1px solid #d8d1c5; font-size: 6px; }
 .preview-nav b { margin-right: auto; color: #171713; font-size: 8px; }
@@ -128,8 +128,6 @@ select { width: 100%; min-height: 38px; padding: 7px 30px 7px 10px; color: var(-
 .preview-art i { width: 82px; height: 82px; position: absolute; right: 7%; bottom: -25px; border: 13px solid #f0a365; border-radius: 50% 50% 4% 50%; transform: rotate(20deg); }
 .preview-form { min-height: 36px; display: flex; align-items: center; justify-content: space-between; gap: 7px; padding: 6px 10px; color: #5d5d5a; font-size: 5px; }
 .preview-form b { color: var(--red); font-size: 6px; }
-.fixture-preview[data-build="fixed"] .observed-pane { background: #e5ede7; }
-.fixture-preview[data-build="fixed"] .observed-pane .preview-form b, .fixture-preview[data-build="fixed"] .observed-pane .preview-nav .fault { color: var(--green); }
 
 .detail { min-height: 304px; margin: 0 22px; padding: 20px 0 12px; border-bottom: 1px solid var(--line); }
 .detail-top { display: grid; grid-template-columns: 110px minmax(0,1fr); align-items: start; gap: 14px; }
@@ -182,7 +180,6 @@ select { width: 100%; min-height: 38px; padding: 7px 30px 7px 10px; color: var(-
   .issue-row { grid-template-columns: 48px minmax(0,1fr); padding-right: 10px; }
   .severity { grid-column: 2; justify-self: start; margin-bottom: 10px; }
   .fixture-preview { grid-template-columns: 1fr; margin: 14px 14px 0; }
-  .fixed-pane { display: none; }
   .detail { margin: 0 14px; }
   .detail-top, .detail-block { grid-template-columns: 1fr; gap: 4px; }
   .detail-top h3 { font-size: 20px; }
