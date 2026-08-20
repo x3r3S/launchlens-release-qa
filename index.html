@@ -1,0 +1,122 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <meta name="color-scheme" content="light">
+  <title>LaunchLens — Release evidence room</title>
+  <link rel="icon" href="favicon.svg" type="image/svg+xml">
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body data-demo="true">
+  <header class="product-bar">
+    <a class="brand" href="#workspace" aria-label="LaunchLens release room">
+      <span class="brand-sigil" aria-hidden="true">LL</span>
+      <span>LaunchLens</span>
+    </a>
+    <div class="release-id">
+      <span>Northstar Store</span>
+      <b>Release review · 1.4.2 → 1.4.3</b>
+    </div>
+    <button id="export-report" class="export-button" type="button">Export evidence</button>
+  </header>
+
+  <main id="workspace" class="release-room">
+    <section class="report-masthead" aria-labelledby="page-title">
+      <div class="report-heading">
+        <p class="folio">RELEASE DOSSIER / 18 AUG 2026</p>
+        <h1 id="page-title">Pre-launch quality review</h1>
+        <p class="standfirst">A decision record for five storefront findings, with reproducible evidence and a like-for-like fixed-build retest.</p>
+      </div>
+      <dl class="report-meta">
+        <div><dt>Owner</dt><dd>Web QA</dd></div>
+        <div><dt>Scope</dt><dd>Checkout entry</dd></div>
+        <div><dt>Target</dt><dd>Build 1.4.3</dd></div>
+      </dl>
+      <div class="decision-block" aria-label="Current release decision">
+        <span>Release decision</span>
+        <strong id="scan-status"></strong>
+        <small id="decision-note">Evidence review required before handoff</small>
+      </div>
+    </section>
+
+    <section class="control-strip" aria-label="Evidence controls">
+      <label>
+        Review build
+        <select id="build-select">
+          <option value="broken">Observed · 1.4.2</option>
+          <option value="fixed">Retest · 1.4.3</option>
+        </select>
+      </label>
+      <label>
+        Test viewport
+        <select id="viewport-select"></select>
+      </label>
+      <button id="run-scan" class="primary-action" type="button">Run evidence check</button>
+      <p class="boundary-note"><span aria-hidden="true">†</span> Viewport checks are deterministic browser-size simulations, not physical-device coverage.</p>
+    </section>
+
+    <section id="metrics" class="report-summary" aria-label="Review summary"></section>
+
+    <section class="dossier-grid">
+      <article class="findings-sheet" aria-labelledby="findings-title">
+        <header class="sheet-heading">
+          <div>
+            <p class="section-number">SECTION 01</p>
+            <h2 id="findings-title">Findings register</h2>
+          </div>
+          <span>SELECT A FINDING TO REVIEW</span>
+        </header>
+        <div class="filter-row">
+          <label for="severity-filter">Severity</label>
+          <select id="severity-filter">
+            <option value="all">All findings</option>
+            <option value="high">High</option>
+            <option value="medium">Medium</option>
+            <option value="low">Low</option>
+          </select>
+          <span id="issue-count"></span>
+        </div>
+        <div id="issue-list" class="issue-list"></div>
+      </article>
+
+      <article class="evidence-sheet" aria-labelledby="evidence-title">
+        <header class="sheet-heading evidence-heading">
+          <div>
+            <p class="section-number">SECTION 02</p>
+            <h2 id="evidence-title">Evidence & retest</h2>
+          </div>
+          <span>LIKE-FOR-LIKE COMPARISON</span>
+        </header>
+
+        <div id="fixture-preview" class="fixture-preview" data-build="broken">
+          <section class="capture-pane observed-pane" aria-label="Observed build preview">
+            <div class="capture-label"><b data-preview-build>Observed build 1.4.2</b><span data-preview-state>5 findings open</span></div>
+            <div class="preview-window">
+              <div class="preview-nav"><b>northstar</b><span>Journal</span><span>Objects</span><span class="fault" data-preview-link>/pricing-legacy · 404</span></div>
+              <div class="preview-art"><span>OBJECT 07</span><strong>Quiet tools<br>for loud ideas.</strong><i></i></div>
+              <div class="preview-form"><span>EARLY ACCESS</span><b data-preview-form>Accepts hello@ + missing label</b></div>
+            </div>
+          </section>
+          <section class="capture-pane fixed-pane" aria-label="Fixed build reference">
+            <div class="capture-label"><b>Retest build 1.4.3</b><span>reference state</span></div>
+            <div class="preview-window">
+              <div class="preview-nav"><b>northstar</b><span>Journal</span><span>Objects</span><span class="pass">/pricing · 200</span></div>
+              <div class="preview-art"><span>OBJECT 07</span><strong>Quiet tools<br>for loud ideas.</strong><i></i></div>
+              <div class="preview-form"><span>EARLY ACCESS</span><b class="pass">Validated + labelled</b></div>
+            </div>
+          </section>
+        </div>
+
+        <div id="issue-detail" class="detail"></div>
+        <button id="retest-fixed" class="retest-action" type="button">Open fixed-build retest <span aria-hidden="true">→</span></button>
+      </article>
+    </section>
+
+    <footer class="report-footer"><span>LaunchLens / Release evidence room</span><span>Local evidence · no external write</span></footer>
+  </main>
+
+  <div id="toast" class="toast" role="status" aria-live="polite" hidden></div>
+  <script type="module" src="src/app.mjs"></script>
+</body>
+</html>
