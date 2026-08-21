@@ -31,6 +31,45 @@ const expectNoPageOverflow = async (page) => {
   expect(dimensions.scrollWidth).toBeLessThanOrEqual(dimensions.clientWidth);
 };
 
+test("skip link is first and moves focus to the release review", async ({ page }) => {
+  await page.goto("/");
+
+  const skipLink = page.getByRole("link", { name: "Skip to release review" });
+  await page.keyboard.press("Tab");
+  await expect(skipLink).toBeFocused();
+  await expect(skipLink).toBeVisible();
+
+  const box = await skipLink.boundingBox();
+  expect(box).not.toBeNull();
+  expect(box.x).toBeGreaterThanOrEqual(0);
+  expect(box.y).toBeGreaterThanOrEqual(0);
+  expect(box.x + box.width).toBeLessThanOrEqual(page.viewportSize().width);
+  expect(box.y + box.height).toBeLessThanOrEqual(page.viewportSize().height);
+
+  await page.keyboard.press("Enter");
+  await expect(page.locator("main#workspace")).toBeFocused();
+  await expect(page).toHaveURL(/#workspace$/);
+});
+
+test("keyboard finding activation keeps focus on LL-002", async ({ page }) => {
+  await page.goto("/");
+
+  const finding = page.getByRole("button", { name: /Signup accepts an invalid email address/i });
+  await page.keyboard.press("Tab");
+  let findingReached = false;
+  for (let press = 0; press < 16; press += 1) {
+    findingReached = await finding.evaluate((element) => element === document.activeElement);
+    if (findingReached) break;
+    await page.keyboard.press("Tab");
+  }
+  expect(findingReached, "LL-002 is reachable by Tab").toBe(true);
+
+  await page.keyboard.press("Enter");
+  await expect(finding).toHaveAttribute("aria-pressed", "true");
+  await expect(finding).toBeFocused();
+  await expect(page.locator("#issue-detail")).toContainText("Signup accepts an invalid email address");
+});
+
 test("observed and retest UI records remain explicitly seeded and consistent", async ({ page }) => {
   await page.goto("/");
 
