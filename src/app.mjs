@@ -81,6 +81,12 @@ function renderMetrics() {
   }
 }
 
+function restoreIssueFocus(issueId) {
+  const selectedButton = [...elements.issueList.querySelectorAll("[data-issue-id]")]
+    .find((button) => button.dataset.issueId === issueId);
+  selectedButton?.focus({ preventScroll: true });
+}
+
 function renderIssues() {
   const visible = filterIssues(state.record.issues, state.filter);
   if (!visible.some((issue) => issue.id === state.selectedId)) state.selectedId = visible[0]?.id ?? "";
@@ -92,6 +98,7 @@ function renderIssues() {
     const button = document.createElement("button");
     button.type = "button";
     button.className = "issue-row";
+    button.dataset.issueId = issue.id;
     button.dataset.active = String(issue.id === state.selectedId);
     button.setAttribute("aria-pressed", String(issue.id === state.selectedId));
     const number = document.createElement("span");
@@ -108,10 +115,12 @@ function renderIssues() {
     badge.className = `severity severity-${issue.status === "resolved" ? "resolved" : issue.severity}`;
     badge.textContent = issue.status === "resolved" ? "Resolved" : labelSeverity(issue.severity);
     button.append(number, copy, badge);
-    button.addEventListener("click", () => {
+    button.addEventListener("click", (event) => {
+      const restoreKeyboardFocus = event.detail === 0 && document.activeElement === button;
       state.selectedId = issue.id;
       renderIssues();
       renderDetail();
+      if (restoreKeyboardFocus) restoreIssueFocus(issue.id);
     });
     return button;
   }));

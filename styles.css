@@ -30,6 +30,8 @@ body {
 button, select { font: inherit; }
 button, select, a { -webkit-tap-highlight-color: transparent; }
 button:focus-visible, select:focus-visible, a:focus-visible { outline: 3px solid #d28736; outline-offset: 3px; }
+.skip-link { position: fixed; top: 8px; left: 8px; z-index: 80; padding: 9px 13px; color: #fff; background: var(--red); font-size: 11px; font-weight: 800; text-decoration: none; transform: translateY(-160%); transition: transform 120ms ease; }
+.skip-link:focus { transform: translateY(0); }
 
 .product-bar {
   min-height: 58px;
